@@ -1,7 +1,8 @@
-from flask import Flask, request ,make_response
+from flask import Flask, request, make_response
+from flask.ext.script import Manager
 
 app = Flask(__name__)
-
+manager = Manager(app)
 
 @app.route('/')
 def index():
@@ -20,4 +21,4 @@ def response_cookie():
     return response
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    manager.run()
