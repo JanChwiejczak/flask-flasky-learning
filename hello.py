@@ -1,17 +1,21 @@
-from flask import Flask, request, make_response, render_template
+from datetime import datetime
+
+from flask import Flask, request, make_response, render_template, url_for
 from flask_bootstrap import Bootstrap
+from flask_moment import Moment
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
+moment = Moment(app)
 
-@app.route('/')
+@app.route('/agent')
 def agent():
     user_agent = request.headers.get('User-Agent')
     return "Hello world, your browser is {}".format(user_agent)
 
-@app.route('/index')
+@app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', current_time=datetime.utcnow())
 
 @app.route('/user/<name>')
 def user(name):
