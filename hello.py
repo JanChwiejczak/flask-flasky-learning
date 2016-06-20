@@ -1,18 +1,19 @@
-from flask import Flask, request, make_response
-from flask.ext.script import Manager
+from flask import Flask, request, make_response, render_template
 
 app = Flask(__name__)
-manager = Manager(app)
 
 @app.route('/')
-def index():
+def agent():
     user_agent = request.headers.get('User-Agent')
     return "Hello world, your browser is {}".format(user_agent)
 
+@app.route('/index')
+def index():
+    return render_template('index.html')
 
 @app.route('/user/<name>')
 def user(name):
-    return "Hello {}!".format(name)
+    return render_template('user.html', name=name)
 
 @app.route('/cookie')
 def response_cookie():
@@ -21,4 +22,4 @@ def response_cookie():
     return response
 
 if __name__ == '__main__':
-    manager.run()
+    app.run(debug=True)
