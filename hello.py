@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import Flask, request, make_response, render_template, url_for
+from flask import Flask, request, make_response, render_template, redirect, session, url_for, flash
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from flask_wtf import Form
@@ -27,12 +27,14 @@ def index_time():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    name = None
     form = NameForm()
     if form.validate_on_submit():
-        name = form.name.data
-        form.name.data = ''
-    return render_template('index.html', name=name, form=form)
+        old_name = session.get('name')
+        if old_name and old_name != form.name.data:
+            flash('Looks like you have changed your name!')
+        session['name'] = form.name.data
+        return redirect(url_for('index'))
+    return render_template('index.html', name=session.get('name'), form=form)
 
 @app.route('/cookie')
 def response_cookie():
