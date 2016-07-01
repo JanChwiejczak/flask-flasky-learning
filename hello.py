@@ -6,6 +6,7 @@ from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import Form
+from flask_script import Shell, Manager
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 
@@ -17,9 +18,11 @@ app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = "kljhk^%^;:jas76478tgfy;//z"
 
+manager = Manager(app)
 bootstrap = Bootstrap(app)
 moment = Moment(app)
 db = SQLAlchemy(app)
+
 
 class NameForm(Form):
     name = StringField('What is your name?', validators=[DataRequired()])
@@ -42,6 +45,10 @@ class User(db.Model):
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
+
+def make_shell_context():
+    return dict(app=app, db=db, User=User, Role=Role)
+manager.add_command("shell", Shell(make_context=make_shell_context))
 
 @app.route('/agent')
 def agent():
@@ -90,3 +97,4 @@ def internal_server_error():
 
 if __name__ == '__main__':
     app.run(debug=True)
+    manager.run()
