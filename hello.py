@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import Form
 from flask_script import Shell, Manager
 from flask_migrate import Migrate, MigrateCommand
-from flask_mail import Mail
+from flask_mail import Mail, Message
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 
@@ -21,6 +21,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = "kljhk^%^;:jas76478tgfy;//z"
 ############ MAIL CLIENT CONFIG ##################################################
 # MAIL_USERNAME and MAIL_PASSWORD stored as environment variables ################
+app.config['FLASKY_MAIL_SUBJECT_PREFIX'] = '[Flasky]'
+app.config['FLASKY_MAIL_SENDER'] = 'Flasky Admin <flasky@example.com>'
 app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
@@ -56,6 +58,19 @@ class User(db.Model):
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
+
+
+# ------------ EMAIL FUNCTIONS -------------------------#
+
+
+def send_email(to, subject, template, **kwargs):
+    msg = Message(app.config['FLASKY_MAIL_SUBJECT_PREFIX'] + subject,
+                  sender=app.config['FLASKY_MAIL_SENDER'],
+                  recipients=[to])
+    msg.body = render_template(template + '.txt', **kwargs)
+    msg.html = render_template(template + '.html', **kwargs)
+    mail.send(msg)
+    
 
 def make_shell_context():
     return dict(app=app, db=db, User=User, Role=Role)
