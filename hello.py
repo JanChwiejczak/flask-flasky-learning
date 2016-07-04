@@ -21,10 +21,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = "kljhk^%^;:jas76478tgfy;//z"
 ############ MAIL CLIENT CONFIG ##################################################
 # MAIL_USERNAME and MAIL_PASSWORD stored as environment variables ################
+app.config['FLASKY_ADMIN'] = os.environ.get('FLASKY_ADMIN')
 app.config['FLASKY_MAIL_SUBJECT_PREFIX'] = '[Flasky]'
 app.config['FLASKY_MAIL_SENDER'] = 'Flasky Admin <flasky@example.com>'
-app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
-app.config['MAIL_PORT'] = 587
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
@@ -81,9 +82,11 @@ def agent():
     user_agent = request.headers.get('User-Agent')
     return "Hello world, your browser is {}".format(user_agent)
 
+
 @app.route('/time')
 def index_time():
     return render_template('index_time.html', current_time=datetime.utcnow())
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -97,6 +100,8 @@ def index():
             db.session.add(user)
             db.session.commit()
             session['known'] = False
+            if app.config['FLASKY_ADMIN']:
+                send_email(app.config['FLASKY_ADMIN'], 'New user', 'mail/new_user', user=user)
         session['name'] = form.name.data
         form.name.data = ''
 
@@ -122,5 +127,5 @@ def internal_server_error():
     return render_template('500.html'), 500
 
 if __name__ == '__main__':
-    #app.run(debug=True)
+    app.run(debug=True)
     manager.run()
