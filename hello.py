@@ -1,5 +1,7 @@
 from datetime import datetime
+from threading import Thread
 import os
+
 
 from flask import Flask, request, make_response, render_template, redirect, session, url_for, flash
 from flask_bootstrap import Bootstrap
@@ -19,8 +21,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'da
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = "kljhk^%^;:jas76478tgfy;//z"
-############ MAIL CLIENT CONFIG ##################################################
-# MAIL_USERNAME and MAIL_PASSWORD stored as environment variables ################
+
+# MAIL CLIENT CONFIG
+# MAIL_USERNAME and MAIL_PASSWORD stored as environment variables
+
 app.config['FLASKY_ADMIN'] = os.environ.get('FLASKY_ADMIN')
 app.config['FLASKY_MAIL_SUBJECT_PREFIX'] = '[Flasky]'
 app.config['FLASKY_MAIL_SENDER'] = 'Flasky Admin <flasky@example.com>'
@@ -38,9 +42,11 @@ migrate = Migrate(app, db)
 mail = Mail(app)
 manager.add_command('db', MigrateCommand)
 
+
 class NameForm(Form):
     name = StringField('What is your name?', validators=[DataRequired()])
     submit = SubmitField('Submit')
+
 
 class Role(db.Model):
     __tablename__ = 'roles'
@@ -50,6 +56,7 @@ class Role(db.Model):
 
     def __repr__(self):
         return '<Role {}>'.format(self.name)
+
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -63,19 +70,26 @@ class User(db.Model):
 
 # ------------ EMAIL FUNCTIONS -------------------------#
 
-
 def send_email(to, subject, template, **kwargs):
     msg = Message(app.config['FLASKY_MAIL_SUBJECT_PREFIX'] + subject,
                   sender=app.config['FLASKY_MAIL_SENDER'],
                   recipients=[to])
     msg.body = render_template(template + '.txt', **kwargs)
     msg.html = render_template(template + '.html', **kwargs)
-    mail.send(msg)
-    
+    thr = Thread(target=send_async_email, args=[app, msg])
+    thr.start()
+    return thr
+
+
+def send_async_email(app, msg):
+    with app.app_context():
+        mail.send(msg)
+
 
 def make_shell_context():
     return dict(app=app, db=db, User=User, Role=Role)
 manager.add_command("shell", Shell(make_context=make_shell_context))
+
 
 @app.route('/agent')
 def agent():
@@ -112,15 +126,18 @@ def index():
                            known=session.get('known', False),
                            form=form)
 
+
 @app.route('/cookie')
 def response_cookie():
     response = make_response('This doc carries cookie')
     response.set_cookie('answer', '42')
     return response
 
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
 
 @app.errorhandler(500)
 def internal_server_error():
