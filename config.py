@@ -3,8 +3,10 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
+    WTF_CSRF_ENABLED = True
     SECRET_KEY = os.environ.get('SECRET_KEY')
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 465
     MAIL_USE_TLS = True
