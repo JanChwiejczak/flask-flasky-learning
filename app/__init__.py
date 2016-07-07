@@ -21,8 +21,11 @@ def create_app(config_name):
     moment.init_app(app)
     db.init_app(app)
 
-    # Attach custom routes and error pages here
+    # Import blueprints
+    from main import main as main_blueprint
 
+    # register blueprints with the app instance
+    app.register_blueprint(main_blueprint)
 
     return app
 
