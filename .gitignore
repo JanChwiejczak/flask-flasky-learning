@@ -1,5 +1,4 @@
 .idea/
-data.sqlite
+*.sqlite
 *__pycache__/
 environment.txt
-*sqlite
