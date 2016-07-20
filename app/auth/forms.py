@@ -11,6 +11,13 @@ class LoginForm(Form):
     submit = SubmitField('Log in')
 
 
+class ChangePasswordForm(Form):
+    old_password = PasswordField('Old Password', validators=[DataRequired()])
+    password = PasswordField('New Password', validators=[DataRequired(), EqualTo('password2', 'Passwords must match.')])
+    password2 = PasswordField('Confirm New Password', validators=[DataRequired()])
+    submit = SubmitField('Change Password')
+
+
 class RegistrationForm(Form):
     email = StringField('Email', validators=[DataRequired(), Length(1, 64), Email()])
     username = StringField('Username', validators=[
