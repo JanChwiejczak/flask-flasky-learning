@@ -18,6 +18,18 @@ class ChangePasswordForm(Form):
     submit = SubmitField('Change Password')
 
 
+class PasswordResetRequestForm(Form):
+    email = StringField('Email', validators=[DataRequired(), Length(1, 64), Email()])
+    submit = SubmitField('Send Password Reset')
+
+
+class PasswordResetForm(Form):
+    email = StringField('Email', validators=[DataRequired(), Length(1, 64), Email()])
+    password = PasswordField('New Password', validators=[DataRequired(), EqualTo('password2', 'Passwords must match.')])
+    password2 = PasswordField('Confirm New Password', validators=[DataRequired()])
+    submit = SubmitField('Change Password')
+
+
 class RegistrationForm(Form):
     email = StringField('Email', validators=[DataRequired(), Length(1, 64), Email()])
     username = StringField('Username', validators=[

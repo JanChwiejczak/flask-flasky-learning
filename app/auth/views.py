@@ -4,7 +4,8 @@ from . import auth
 from .. import db
 from ..models import User
 from ..email import send_email
-from .forms import LoginForm, RegistrationForm, ChangePasswordForm
+from .forms import (LoginForm, RegistrationForm, ChangePasswordForm,
+                    PasswordResetRequestForm, PasswordResetForm)
 
 
 @auth.before_app_request
@@ -67,6 +68,38 @@ def change_password():
             flash('Thank you your password has been updated')
         return redirect(url_for('main.index'))
     return render_template('/auth/change_password.html', form=form)
+
+
+@auth.route('/reset-password/', methods=['GET', 'POST'])
+def password_reset_request():
+    form = PasswordResetRequestForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            token = user.generate_reset_token()
+            send_email(form.email.data,
+                       'Reset your password',
+                       'auth/email/reset_password',
+                       user=user,
+                       token=token)
+            flash('A password reset email has been sent to you.')
+            return redirect(url_for('auth.login'))
+        flash('Email address not recognized please register or try again')
+    return render_template('/auth/reset_password.html', form=form)
+
+
+@auth.route('/reset/<token>', methods=['GET', 'POST'])
+def password_reset(token):
+    form = PasswordResetForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user.reset_password(token, form.password.data):
+            flash('Your password has been updated.')
+            return redirect(url_for('auth.login'))
+        else:
+            flash('Failed to reset your password.')
+            return redirect(url_for('main.index'))
+    return render_template('auth/reset_password.html', form=form)
 
 
 @auth.route('/confirm/<token>')
