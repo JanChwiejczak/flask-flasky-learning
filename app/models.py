@@ -2,7 +2,7 @@ from . import db
 from . import login_manager
 from flask import current_app
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin
+from flask_login import UserMixin, AnonymousUserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 
@@ -127,4 +127,6 @@ class AnonymousUser(AnonymousUserMixin):
 
     def is_administrator(self):
         return False
+
+login_manager.anonymous_user = AnonymousUser
 

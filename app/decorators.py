@@ -2,7 +2,7 @@ from functools import wraps
 from flask import abort
 from flask_login import current_user
 
-from models import Permission
+from .models import Permission
 
 def permission_required(permission):
     def decorator(f):
@@ -14,5 +14,5 @@ def permission_required(permission):
         return decorated_function
     return decorator
 
-def admin_required(f)
+def admin_required(f):
     return permission_required(Permission.ADMINISTER)(f)
